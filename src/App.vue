@@ -1,17 +1,22 @@
 <template>
   <div id="app">
-    <img src="./assets/logo.png">
-    <HelloWorld/>
+    <input v-on:click="refreshMessage" />
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld'
-
-export default {
-  name: 'App',
-  components: {
-    HelloWorld
+module.exports = {
+  data: function() {
+    return {
+      api_key: '67A6161D-F28A-4CAC-944D-8D392FEEC26B'
+    }
+  },
+  methods: {
+    refreshMessage() {
+      this.$http.get('v1/exchangerate/BTC?apikey=67A6161D-F28A-4CAC-944D-8D392FEEC26B').then((response) => {
+        console.log('test HTTP',response);
+      });
+    }
   }
 }
 </script>
