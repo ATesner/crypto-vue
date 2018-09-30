@@ -4,18 +4,18 @@
       <h1>CRYPTO VUE</h1>
       <div class="search-form">
         <form>
-          <input id="search-input" v-on:blur="blurSearch" type="text" maxlength="10"
+          <input id="search-input" v-on:blur="blurSearch" v-on:focus="focusSearch" type="text" maxlength="10"
           placeholder="Search Crypto" v-on:keyup="searchCrypto" v-model="txtSearch" />
           <button v-on:click="clickSearch"></button>
+      <ul class="instant-result-list">
+        <li class="instant-result-item" :key="index" v-for="(crypto, index) in resultSearch">
+          <app-item :name="crypto.name" :symbol="crypto.asset_id"></app-item>
+        </li>
+      </ul>
         </form>
         <h2 id="search-label" v-on:click="clickSearch">Search</h2>
       </div>
     </nav>
-    <ul class="instant-result-list">
-      <li class="instant-result-item" :key="index" v-for="(crypto, index) in resultSearch">
-        <app-item :name="crypto.name" :symbol="crypto.asset_id"></app-item>
-      </li>
-    </ul>
   </div>
 </template>
 
@@ -37,7 +37,8 @@ module.exports = {
   methods: {
     searchCrypto: function(e) {
       if(this.cryptoAssets.length > 0 && this.txtSearch.length >= 2){
-        console.log('KEYUP', this.txtSearch)
+        document.querySelector('.instant-result-list').style.display = "block";
+
         this.resultSearch = this.cryptoAssets.filter(asset => (
           asset.name.toLowerCase().includes(this.txtSearch.toLowerCase()) ||  
           asset.asset_id.toLowerCase().includes(this.txtSearch.toLowerCase())
@@ -49,16 +50,25 @@ module.exports = {
         });*/
       }else{
         this.resultSearch = [];
+        document.querySelector('.instant-result-list').style.display = "none";
       }
     },
     clickSearch : function(e) {
         e.preventDefault();
         document.querySelector('.search-form').classList.toggle('active');
+        document.querySelector('.instant-result-list').style.display = "none";
         document.querySelector('input').focus();
     },
     blurSearch: function() {
+      document.querySelector('.instant-result-list').style.display = "none";
       if(document.querySelector('#search-input').value.length == 0 ){
         document.querySelector('.search-form').classList.remove('active');
+      }
+    },
+    focusSearch : function() {
+      if(document.querySelector('#search-input').value.length > 2 &&
+        document.querySelector('.search-form').classList.contains('active')){
+        document.querySelector('.instant-result-list').style.display = "block";
       }
     }
   }
@@ -100,12 +110,20 @@ module.exports = {
     cursor: pointer;  
 }
 .instant-result-list {
+  position: absolute;
   list-style: none;
   border: 1px solid black;
   height: 20vh;
-  width: auto;
+  width: 75%;
+  right: 5px;
+  top: 67px;
+  background: white;
   overflow-y: scroll;
-  margin-top: 90px;
+  margin-top: 0;
+  display: none;
+  z-index: 2;
+  border-radius: 2%;
+  box-shadow: 1px 1px 1px 1px darkcyan;
 }
 
 .instant-result-item {
@@ -203,6 +221,25 @@ button:before {
 
 .active button:before {
   transform: scale(1);
+}
+
+::-webkit-scrollbar {
+    width: 5px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    background: #f1f1f1; 
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: #888; 
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: #555; 
 }
 
 </style>
