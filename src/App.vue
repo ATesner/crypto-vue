@@ -5,17 +5,22 @@
       <div class="search-form">
         <form>
           <input id="search-input" v-on:blur="blurSearch" v-on:focus="focusSearch" type="text" maxlength="10"
-          placeholder="Search Crypto" v-on:keyup="searchCrypto" v-model="txtSearch" />
+          placeholder="Search Crypto" v-on:keyup="searchCrypto" v-model="txtSearch" v-on:mouseover="focusSearch" />
           <button v-on:click="clickSearch"></button>
-      <ul class="instant-result-list">
-        <li class="instant-result-item" :key="index" v-for="(crypto, index) in resultSearch">
-          <app-item :name="crypto.name" :symbol="crypto.asset_id"></app-item>
-        </li>
-      </ul>
+          <ul class="instant-result-list" v-on:mouseover="hoverInstantList" v-on:mouseleave="leaveInstantList">
+            <li class="instant-result-item" :key="index" v-for="(crypto, index) in resultSearch" >
+               <app-item :name="crypto.name" :symbol="crypto.asset_id" 
+                v-on:click.native="clickResult(crypto.asset_id, crypto.name)"></app-item>
+            </li>
+          </ul>
         </form>
         <h2 id="search-label" v-on:click="clickSearch">Search</h2>
       </div>
     </nav>
+    <div class="asset-overview">
+      <h4 id="asset-overview-name"></h4>
+      <label id="asset-overview-symbol"></label> <div id="asset-overview-price"></div>
+    </div>
   </div>
 </template>
 
@@ -25,7 +30,8 @@ module.exports = {
     return {
       cryptoAssets: [],
       resultSearch: [],
-      txtSearch: ""
+      txtSearch: "",
+      instantListFocus: false
     }
   },
   created: function() {
@@ -44,10 +50,7 @@ module.exports = {
           asset.asset_id.toLowerCase().includes(this.txtSearch.toLowerCase())
         )) 
         console.log('Asset Find', this.resultSearch)
-        /*this.$http.get('v1/exchangerate/'+this.txtSearch+'/EUR').then((response) => {
-          console.log('search result',response);
-          this.resultSearch = response.body;
-        });*/
+
       }else{
         this.resultSearch = [];
         document.querySelector('.instant-result-list').style.display = "none";
@@ -60,16 +63,36 @@ module.exports = {
         document.querySelector('input').focus();
     },
     blurSearch: function() {
-      document.querySelector('.instant-result-list').style.display = "none";
+      if(!this.instantListFocus) document.querySelector('.instant-result-list').style.display = "none";
       if(document.querySelector('#search-input').value.length == 0 ){
         document.querySelector('.search-form').classList.remove('active');
       }
+    },
+    leaveInstantList: function() { 
+      console.log('Instant List Focus OFF')
+      this.instantListFocus = false;
+      document.querySelector('.instant-result-list').style.display = "none";
+       
+    },
+    hoverInstantList: function() { 
+      console.log('Instant List Focus ON')
+      this.instantListFocus = true;
     },
     focusSearch : function() {
       if(document.querySelector('#search-input').value.length > 2 &&
         document.querySelector('.search-form').classList.contains('active')){
         document.querySelector('.instant-result-list').style.display = "block";
       }
+    },
+    clickResult : function(asset_id, name) {
+      console.log('Click on ' + asset_id)
+      this.$http.get('v1/exchangerate/'+ asset_id +'/EUR').then((response) => {
+        console.log('Asset Overview',response);
+        // this.resultSearch = response.body;
+          document.querySelector('#asset-overview-name').innerHTML = name;
+          document.querySelector('#asset-overview-symbol').innerHTML = asset_id;
+          document.querySelector('#asset-overview-price').innerHTML = response.body.rate;
+      });
     }
   }
 }
@@ -134,6 +157,10 @@ module.exports = {
   background-color: lightgrey;
 }
 
+.asset-overview {
+  margin-top:100px;
+  width: auto;
+}
 
 .search-form {
  position: relative;
