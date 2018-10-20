@@ -6,7 +6,7 @@
         <form>
           <input id="search-input" v-on:blur="blurSearch" v-on:focus="focusSearch" type="text" maxlength="10"
           placeholder="Search Crypto" v-on:keyup="searchCrypto" v-model="txtSearch" v-on:mouseover="focusSearch" />
-          <button v-on:click="clickSearch"></button>
+          <button class="search-button" v-on:click="clickSearch"></button>
           <ul class="instant-result-list" v-on:mouseover="hoverInstantList" v-on:mouseleave="leaveInstantList">
             <li class="instant-result-item" :key="index" v-for="(crypto, index) in resultSearch" >
                <app-item :name="crypto.name" :symbol="crypto.asset_id" 
@@ -17,9 +17,19 @@
         <h2 id="search-label" v-on:click="clickSearch">Search</h2>
       </div>
     </nav>
-    <div class="asset-overview">
-      <h4 id="asset-overview-name"></h4>
-      <label id="asset-overview-symbol"></label> <div id="asset-overview-price"></div>
+    <div class="dashboard-container">
+      <div class="asset-overview">
+        <h4 id="asset-overview-name"></h4>
+        <label id="asset-overview-symbol"></label> <div id="asset-overview-price"></div>
+        <button v-on:click="addCrypto">Ajouter au dashboard</button>
+        <button v-on:click="reinitDashboard">Réinitialiser dashboard</button>
+      </div>
+      <ul id="dashboard-list">
+          <li class="dashboard-item" :key="index" v-for="(crypto, index) in dashboardList">
+            <h4>{{crypto.name}}</h4>
+            <label>{{crypto.asset_id}}</label> <div>{{crypto.rate}}</div>
+          </li>
+      </ul>
     </div>
   </div>
 </template>
@@ -31,13 +41,19 @@ module.exports = {
       cryptoAssets: [],
       resultSearch: [],
       txtSearch: "",
-      instantListFocus: false
+      instantListFocus: false,
+      dashboardList: []
     }
   },
   created: function() {
     this.$http.get('v1/assets').then((response) => {
       console.log('all assets',response);
       this.cryptoAssets = response.body;
+      if(localStorage.getItem('dashboardList')){
+        this.dashboardList = JSON.parse(localStorage.getItem('dashboardList'));
+        console.log('DASHBOARD LIST', this.dashboardList)
+      }
+     // document.querySelector('#dashboard-list').append('<li>'+ localStorage.asset_name +'</li>');
     });
   },
   methods: {
@@ -93,6 +109,20 @@ module.exports = {
           document.querySelector('#asset-overview-symbol').innerHTML = asset_id;
           document.querySelector('#asset-overview-price').innerHTML = response.body.rate;
       });
+    },
+    addCrypto : function() {
+      let cryptoToAdd = { 
+        name: document.querySelector('#asset-overview-name').innerHTML,
+        asset_id: document.querySelector('#asset-overview-symbol').innerHTML,
+        rate: document.querySelector('#asset-overview-price').innerHTML
+      }
+      this.dashboardList.push(cryptoToAdd)
+      var parsed = global.JSON.stringify(this.dashboardList);
+      localStorage.setItem('dashboardList', parsed);
+    },
+    reinitDashboard: function() {
+      this.dashboardList = [];
+      localStorage.setItem('dashboardList', undefined);
     }
   }
 }
@@ -157,7 +187,7 @@ module.exports = {
   background-color: lightgrey;
 }
 
-.asset-overview {
+.dashboard-container {
   margin-top:100px;
   width: auto;
 }
@@ -198,7 +228,7 @@ input {
   border-radius: 36px;
 }
 
-button {
+.search-button {
   background: rgba(255, 255, 255, 1);
   position: absolute;
   height: 100%;
@@ -211,7 +241,7 @@ button {
   cursor: pointer;
 }
 
-button:after {
+.search-button:after {
   content: ' ';
   position: absolute;
   width: 32px;
@@ -225,7 +255,7 @@ button:after {
   border-radius: 50%;
 }
 
-button:before {
+.search-button:before {
   content: ' ';
   position: absolute;
   width: 24px;
@@ -242,11 +272,11 @@ button:before {
   transition: all 0.8s ease;
 }
 
-.active button {
+.active .search-button {
   transform: translateX(260px);
 }
 
-.active button:before {
+.active .search-button:before {
   transform: scale(1);
 }
 
