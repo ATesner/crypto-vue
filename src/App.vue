@@ -19,15 +19,19 @@
     </nav>
     <div class="dashboard-container">
       <div class="asset-overview">
-        <h4 id="asset-overview-name"></h4>
-        <label id="asset-overview-symbol"></label> <div id="asset-overview-price"></div>
-        <button v-on:click="addCrypto">Ajouter au dashboard</button>
-        <button v-on:click="reinitDashboard">Réinitialiser dashboard</button>
+        <div class="asset-overview-panel">
+          <h4 id="asset-overview-name"></h4>
+          <label id="asset-overview-symbol"></label> <div id="asset-overview-price"></div>
+        </div>
+        <div class="asset-overview-actions">
+          <button v-on:click="addCrypto">Ajouter au dashboard</button> <br/> <br/>
+          <button v-on:click="reinitDashboard">Réinitialiser dashboard</button>
+        </div>
       </div>
       <ul id="dashboard-list">
           <li class="dashboard-item" :key="index" v-for="(crypto, index) in dashboardList">
-            <h4>{{crypto.name}}</h4>
-            <label>{{crypto.asset_id}}</label> <div>{{crypto.rate}}</div>
+            <h4>{{crypto.name}} ({{crypto.asset_id}})</h4>
+            <label></label> <div>{{crypto.rate}} €</div>
           </li>
       </ul>
     </div>
@@ -114,7 +118,7 @@ module.exports = {
       let cryptoToAdd = { 
         name: document.querySelector('#asset-overview-name').innerHTML,
         asset_id: document.querySelector('#asset-overview-symbol').innerHTML,
-        rate: document.querySelector('#asset-overview-price').innerHTML
+        rate: parseFloat(document.querySelector('#asset-overview-price').innerHTML)
       }
       this.dashboardList.push(cryptoToAdd)
       var parsed = global.JSON.stringify(this.dashboardList);
@@ -299,4 +303,22 @@ input {
     background: #555; 
 }
 
+.asset-overview-actions, .asset-overview-panel {
+  display: inline-block;
+}
+
+#dashboard-list {
+  list-style: none;
+  margin: none;
+  width: 90%;
+}
+
+.dashboard-item {
+    border: 1px solid darkslategray;
+    width: 80%;
+    margin-bottom: 10px;
+    padding: 0 0 10px 10px;
+    background-color: #2c3e50;
+    color: white;
+}
 </style>
