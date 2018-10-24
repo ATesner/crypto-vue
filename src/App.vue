@@ -24,14 +24,14 @@
           <label id="asset-overview-symbol"></label> <div id="asset-overview-price"></div>
         </div>
         <div class="asset-overview-actions">
-          <button v-on:click="addCrypto">Ajouter au dashboard</button> <br/> <br/>
-          <button v-on:click="reinitDashboard">Réinitialiser dashboard</button>
+          <button class="mybtn add-btn" v-on:click="addCrypto">Ajouter au dashboard</button> <br/> <br/>
+          <button class="mybtn clear-btn" v-on:click="reinitDashboard">Réinitialiser dashboard</button>
         </div>
       </div>
       <ul id="dashboard-list">
           <li class="dashboard-item" :key="index" v-for="(crypto, index) in dashboardList">
-            <h4>{{crypto.name}} ({{crypto.asset_id}})</h4>
-            <label></label> <div>{{crypto.rate}} €</div>
+            <h4>{{crypto.name}}</h4>
+            <div>{{crypto.rate}} €</div>
           </li>
       </ul>
     </div>
@@ -56,7 +56,11 @@ module.exports = {
       if(localStorage.getItem('dashboardList')){
         this.dashboardList = JSON.parse(localStorage.getItem('dashboardList'));
         console.log('DASHBOARD LIST', this.dashboardList)
+      }else{
+        this.dashboardList = [];
       }
+     // setInterval(this.updateRates, 10000);
+      this.updateRates();
      // document.querySelector('#dashboard-list').append('<li>'+ localStorage.asset_name +'</li>');
     });
   },
@@ -109,9 +113,10 @@ module.exports = {
       this.$http.get('v1/exchangerate/'+ asset_id +'/EUR').then((response) => {
         console.log('Asset Overview',response);
         // this.resultSearch = response.body;
-          document.querySelector('#asset-overview-name').innerHTML = name;
+          document.querySelector('#asset-overview-name').innerHTML = name + ' (' + asset_id + ')';
           document.querySelector('#asset-overview-symbol').innerHTML = asset_id;
           document.querySelector('#asset-overview-price').innerHTML = response.body.rate;
+          document.querySelector('.add-btn').style.display = "inline-block";
       });
     },
     addCrypto : function() {
@@ -121,12 +126,28 @@ module.exports = {
         rate: parseFloat(document.querySelector('#asset-overview-price').innerHTML)
       }
       this.dashboardList.push(cryptoToAdd)
-      var parsed = global.JSON.stringify(this.dashboardList);
-      localStorage.setItem('dashboardList', parsed);
+      this.saveDashboardList();
     },
     reinitDashboard: function() {
       this.dashboardList = [];
       localStorage.setItem('dashboardList', undefined);
+    },
+    updateRates: function() {
+
+      for(let i=0; i<this.dashboardList.length; i++){
+        console.log('UPDATERATES')
+        this.$http.get('v1/exchangerate/'+ this.dashboardList[i].asset_id +'/EUR').then((response) => {
+        console.log('Asset UPDATE',response);
+        // this.resultSearch = response.body;
+          this.dashboardList[i].rate = response.body.rate;
+          this.saveDashboardList();
+        });
+      }
+    },
+    saveDashboardList: function() {
+      console.log('Save DashboardList')
+      var parsed = global.JSON.stringify(this.dashboardList);
+      localStorage.setItem('dashboardList', parsed);
     }
   }
 }
@@ -139,6 +160,44 @@ module.exports = {
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
   margin-top: 60px;
+}
+
+.mybtn {
+/* Text color */
+      color: #0099CC; 
+/* Remove background color */
+      background: transparent; 
+/* Border thickness, line style, and color */
+      border: 2px solid #0099CC;
+/* Adds curve to border corners */
+      border-radius: 6px; 
+/* Make letters uppercase */
+      border: none;
+      color: white;
+      padding: 12px 24px;
+      text-align: center;
+      font-size: 12px;
+      margin: 2px 2px;
+      -webkit-transition-duration: 0.4s; /* Safari */
+      transition-duration: 0.4s;
+      cursor: pointer;
+      text-decoration: none;
+      text-transform: uppercase;
+      background-color: white; 
+      color: black; 
+      border: 2px solid #008CBA;
+}
+/*button on hover*/
+ .mybtn:hover {
+      background-color: #008CBA;
+      color: white;
+ }
+
+.add-btn {
+  display: none;
+}
+.clear-btn {
+  display: inline-block;
 }
 
 #navbar {
@@ -305,6 +364,9 @@ input {
 
 .asset-overview-actions, .asset-overview-panel {
   display: inline-block;
+}
+.asset-overview-symbol {
+  display: none;
 }
 
 #dashboard-list {
