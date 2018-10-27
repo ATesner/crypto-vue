@@ -19,9 +19,10 @@
     </nav>
     <div class="dashboard-container">
       <div class="asset-overview">
+        <img id="asset-overview-image" src=""/>
         <div class="asset-overview-panel">
           <h4 id="asset-overview-name"></h4>
-          <label id="asset-overview-symbol"></label> <div id="asset-overview-price"></div>
+          <label style="display:none;" id="asset-overview-symbol"></label> <div id="asset-overview-price"></div>
         </div>
         <div class="asset-overview-actions">
           <button class="mybtn add-btn" v-on:click="addCrypto">Ajouter au dashboard</button> <br/> <br/>
@@ -30,7 +31,7 @@
       </div>
       <ul id="dashboard-list">
           <li class="dashboard-item" :key="index" v-for="(crypto, index) in dashboardList">
-            <h4>{{crypto.name}}</h4>
+            <h4><img :src="crypto.img" /> {{crypto.name}}</h4>
             <div>{{crypto.rate}} €</div>
           </li>
       </ul>
@@ -114,6 +115,7 @@ module.exports = {
         console.log('Asset Overview',response);
         // this.resultSearch = response.body;
           let data = response.body.data;
+          document.querySelector('#asset-overview-image').src = "https://s2.coinmarketcap.com/static/img/coins/32x32/"+id+".png";
           document.querySelector('#asset-overview-name').innerHTML = name + ' (' + symbol + ')';
           document.querySelector('#asset-overview-symbol').innerHTML = symbol;
           document.querySelector('#asset-overview-price').innerHTML = data.quotes.EUR.price;
@@ -122,6 +124,7 @@ module.exports = {
     },
     addCrypto : function() {
       let cryptoToAdd = { 
+        img: document.querySelector('#asset-overview-image').src,
         name: document.querySelector('#asset-overview-name').innerHTML,
         symbol: document.querySelector('#asset-overview-symbol').innerHTML,
         rate: parseFloat(document.querySelector('#asset-overview-price').innerHTML)
