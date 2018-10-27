@@ -9,8 +9,8 @@
           <button class="search-button" v-on:click="clickSearch"></button>
           <ul class="instant-result-list" v-on:mouseover="hoverInstantList" v-on:mouseleave="leaveInstantList">
             <li class="instant-result-item" :key="index" v-for="(crypto, index) in resultSearch" >
-               <app-item :name="crypto.name" :symbol="crypto.asset_id" 
-                v-on:click.native="clickResult(crypto.asset_id, crypto.name)"></app-item>
+               <app-item :name="crypto.name" :symbol="crypto.symbol" 
+                v-on:click.native="clickResult(crypto.id, crypto.symbol, crypto.name)"></app-item>
             </li>
           </ul>
         </form>
@@ -50,9 +50,9 @@ module.exports = {
     }
   },
   created: function() {
-    this.$http.get('v1/assets').then((response) => {
+    this.$http.get('listings/').then((response) => {
       console.log('all assets',response);
-      this.cryptoAssets = response.body;
+      this.cryptoAssets = response.body.data;
       if(localStorage.getItem('dashboardList')){
         this.dashboardList = JSON.parse(localStorage.getItem('dashboardList'));
         console.log('DASHBOARD LIST', this.dashboardList)
@@ -71,7 +71,7 @@ module.exports = {
 
         this.resultSearch = this.cryptoAssets.filter(asset => (
           asset.name.toLowerCase().includes(this.txtSearch.toLowerCase()) ||  
-          asset.asset_id.toLowerCase().includes(this.txtSearch.toLowerCase())
+          asset.symbol.toLowerCase().includes(this.txtSearch.toLowerCase())
         )) 
         console.log('Asset Find', this.resultSearch)
 
@@ -108,21 +108,22 @@ module.exports = {
         document.querySelector('.instant-result-list').style.display = "block";
       }
     },
-    clickResult : function(asset_id, name) {
-      console.log('Click on ' + asset_id)
-      this.$http.get('v1/exchangerate/'+ asset_id +'/EUR').then((response) => {
+    clickResult : function(id, symbol, name) {
+      console.log('Click on ' + symbol)
+      this.$http.get('ticker/'+id+'/?convert=EUR').then((response) => {
         console.log('Asset Overview',response);
         // this.resultSearch = response.body;
-          document.querySelector('#asset-overview-name').innerHTML = name + ' (' + asset_id + ')';
-          document.querySelector('#asset-overview-symbol').innerHTML = asset_id;
-          document.querySelector('#asset-overview-price').innerHTML = response.body.rate;
+          let data = response.body.data;
+          document.querySelector('#asset-overview-name').innerHTML = name + ' (' + symbol + ')';
+          document.querySelector('#asset-overview-symbol').innerHTML = symbol;
+          document.querySelector('#asset-overview-price').innerHTML = data.quotes.EUR.price;
           document.querySelector('.add-btn').style.display = "inline-block";
       });
     },
     addCrypto : function() {
       let cryptoToAdd = { 
         name: document.querySelector('#asset-overview-name').innerHTML,
-        asset_id: document.querySelector('#asset-overview-symbol').innerHTML,
+        symbol: document.querySelector('#asset-overview-symbol').innerHTML,
         rate: parseFloat(document.querySelector('#asset-overview-price').innerHTML)
       }
       this.dashboardList.push(cryptoToAdd)
@@ -136,10 +137,11 @@ module.exports = {
 
       for(let i=0; i<this.dashboardList.length; i++){
         console.log('UPDATERATES')
-        this.$http.get('v1/exchangerate/'+ this.dashboardList[i].asset_id +'/EUR').then((response) => {
+        this.$http.get('ticker/'+ this.dashboardList[i].id +'/?convert=EUR').then((response) => {
         console.log('Asset UPDATE',response);
         // this.resultSearch = response.body;
-          this.dashboardList[i].rate = response.body.rate;
+          let data = response.body.data;
+          this.dashboardList[i].rate = data.quote.EUR.price;
           this.saveDashboardList();
         });
       }
