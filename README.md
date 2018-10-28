@@ -2,6 +2,8 @@
 
 > A dashboard to follow crypto currencies price
 
+See the project at https://atesner.github.io/crypto-vue/
+
 ## Build Setup
 
 ``` bash
