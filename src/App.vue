@@ -28,15 +28,20 @@
           <button v-if="cryptoSelected" class="mybtn add-btn" v-on:click="addCrypto">Ajouter au dashboard</button> <br/> <br/>
           <button v-if="dashboardList.length > 0" class="mybtn clear-btn" v-on:click="reinitDashboard">Réinitialiser dashboard</button>
         </div>
+        <div class="config-panel">
+          <select v-model="currency" @change="currencyChange">
+              <option :key="index" v-for="(c, index) in currencies" :value="c" :selected="(currency.name == c.name ? 'selected': '')">{{c.name}}</option>
+          </select>
+        </div>
       </div>
       <ul id="dashboard-list">
-          <li class="dashboard-item" :key="index" v-for="(crypto, index) in dashboardList">
-            <div class="dashboard-item-info">
-            <h4><img :src="imgUrl+crypto.id+'.png'" /> {{crypto.name}}</h4>
-            <div>{{crypto.price}} €</div>
-            </div>
-            <button class="mybtn delete-btn" v-on:click="deleteCrypto(index)">Delete</button>
-          </li>
+        <li class="dashboard-item" :key="index" v-for="(crypto, index) in dashboardList">
+          <div class="dashboard-item-info">
+          <h4><img :src="imgUrl+crypto.id+'.png'" /> {{crypto.name}}</h4>
+          <div>{{crypto.price}} {{currency.symbol}}</div>
+          </div>
+          <button class="mybtn delete-btn" v-on:click="deleteCrypto(index)">Delete</button>
+        </li>
       </ul>
     </div>
   </div>

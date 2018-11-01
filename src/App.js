@@ -1,3 +1,5 @@
+ var {currencies} = require('./assets/currencies')
+//import currencies from './assets/currencies';
 module.exports = {
   data: function() {
     return {
@@ -7,16 +9,19 @@ module.exports = {
         resultSearch: [],
         txtSearch: "",
         instantListFocus: false,
-        dashboardList: []
+        dashboardList: [],
+        currency: currencies[0],
+        currencies: currencies
     }
   },
   created: function() {
+    console.log("currencies",currencies);
     this.$http.get('listings/').then((response) => {
       //console.log('all assets', response);
       this.cryptoAssets = response.body.data;
       if(localStorage.getItem('dashboardList')){
         this.dashboardList = JSON.parse(localStorage.getItem('dashboardList'));
-        console.log('DASHBOARD LIST', this.dashboardList)
+        console.log('DASHBOARD LIST', this.dashboardList, currencies)
       }else{
         this.dashboardList = [];
       }
@@ -71,12 +76,12 @@ module.exports = {
         //console.log('Click on ' + crypto.name)
         this.cryptoSelected = crypto;
         this.$http.get('ticker/'+crypto.id+'/?convert=EUR').then((response) => {
-                //console.log('Asset Overview',response);
+                console.log('Asset Overview', crypto, response);
                 let data = response.body.data;
-                this.cryptoSelected.price = data.quotes.EUR.price;
+                this.cryptoSelected.price = data.quotes[this.currency.name].price;
                 document.querySelector('#asset-overview-image').src = this.imgUrl+crypto.id+".png";
                 document.querySelector('#asset-overview-name').innerHTML = crypto.name + ' (' + crypto.symbol + ')';
-                document.querySelector('#asset-overview-price').innerHTML = data.quotes.EUR.price;
+                document.querySelector('#asset-overview-price').innerHTML = data.quotes[this.currency.name].price;
         });
     },
     addCrypto : function() {
@@ -84,22 +89,26 @@ module.exports = {
       this.saveDashboardList();
     },
     deleteCrypto: function(index) {
-        //console.log('DELETE CRYPTO', index, this.dashboardList[index].name, this.dashboardList)
-        this.dashboardList.splice(index, 1);
-        this.saveDashboardList();
+      //console.log('DELETE CRYPTO', index, this.dashboardList[index].name, this.dashboardList)
+      if(window.confirm('Delete this asset ? ' + this.dashboardList[index].name)){
+          this.dashboardList.splice(index, 1);
+          this.saveDashboardList();
+      }
     },
     reinitDashboard: function() {
-      this.dashboardList = [];
-      localStorage.setItem('dashboardList', undefined);
+      if(window.confirm('Delete all dashboard assets ?')){
+        this.dashboardList = [];
+        localStorage.setItem('dashboardList', undefined);
+      }
     },
     updateRates: function() {
 
       for(let i=0; i<this.dashboardList.length; i++){
         //console.log('UPDATERATES')
-        this.$http.get('ticker/'+ this.dashboardList[i].id +'/?convert=EUR').then((response) => {
+        this.$http.get('ticker/'+ this.dashboardList[i].id +'/?convert='+this.currency.name).then((response) => {
             console.log('Asset UPDATE',response);
           let data = response.body.data;
-          this.dashboardList[i].price = data.quotes.EUR.price;
+          this.dashboardList[i].price = data.quotes[this.currency.name].price;
           this.saveDashboardList();
         });
       }
@@ -108,6 +117,10 @@ module.exports = {
       //console.log('Save DashboardList')
       var parsed = global.JSON.stringify(this.dashboardList);
       localStorage.setItem('dashboardList', parsed);
+    },
+    currencyChange: function() {
+      console.log('currencyChange', this.currency)
+      this.updateRates();
     }
   }
 }
