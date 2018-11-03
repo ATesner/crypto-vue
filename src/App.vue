@@ -18,17 +18,24 @@
       </div>
     </nav>
     <div class="dashboard-container">
-      <div class="asset-overview">
-        <img id="asset-overview-image" src=""/>
-        <div class="asset-overview-panel">
-          <h4 id="asset-overview-name"></h4>
-          <div id="asset-overview-price"></div>
-        </div>
-        <div class="asset-overview-actions">
-          <button v-if="cryptoSelected" class="mybtn add-btn" v-on:click="addCrypto">Ajouter au dashboard</button> <br/> <br/>
-          <button v-if="dashboardList.length > 0" class="mybtn clear-btn" v-on:click="reinitDashboard">Réinitialiser dashboard</button>
+      <div class="dashboard-header">
+        <div v-if="cryptoSelected" class="asset-overview">
+          <img :src="cryptoSelected.img"/>
+          <div class="asset-overview-panel">
+            <label><strong>{{cryptoSelected.name}}</strong></label>
+            <div>{{cryptoSelected.price}} {{currency.symbol}}</div>
+          </div>
+          <template v-if="cryptoSelected">
+            <button v-if="!cryptoAlreadyAdded(cryptoSelected)" class="mybtn add-btn" v-on:click="addCrypto">Add to dashboard</button>
+            <label v-else>Asset already added</label>
+          </template>
         </div>
         <div class="config-panel">
+          <button v-if="dashboardList.length > 0" class="mybtn clear-btn" v-on:click="reinitDashboard">
+            Reset dashboard
+          </button>
+          <br/> <br/>
+          <label><strong>Select a currency : </strong></label>
           <select v-model="currency" @change="currencyChange">
               <option :key="index" v-for="(c, index) in currencies" :value="c" :selected="(currency.name == c.name ? 'selected': '')">{{c.name}}</option>
           </select>
@@ -36,9 +43,14 @@
       </div>
       <ul id="dashboard-list">
         <li class="dashboard-item" :key="index" v-for="(crypto, index) in dashboardList">
+          <img class="dashboard-item-image" :src="imgUrl+crypto.id+'.png'" />
           <div class="dashboard-item-info">
-          <h4><img :src="imgUrl+crypto.id+'.png'" /> {{crypto.name}}</h4>
-          <div>{{crypto.price}} {{currency.symbol}}</div>
+            <label><strong> {{crypto.name}} ({{crypto.symbol}})</strong></label>
+            <div>{{crypto.price}} {{currency.symbol}}</div>
+          </div>
+          <div>
+            <label><strong>Market Cap</strong></label>
+            <div>{{crypto.market_cap}}  {{currency.symbol}}</div>
           </div>
           <button class="mybtn delete-btn" v-on:click="deleteCrypto(index)">Delete</button>
         </li>

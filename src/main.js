@@ -13,7 +13,7 @@ Vue.component('app-item', {
   template: '<div><strong>{{name}}</strong>  ({{symbol}})</div>'
 })
 
-new Vue({
+var vm = new Vue({
   el: '#app',
   components: { App },
   template: '<App/>'
