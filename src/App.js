@@ -10,8 +10,8 @@ module.exports = {
         txtSearch: "",
         instantListFocus: false,
         dashboardList: [],
-        currency: currencies[0],
         currencies: currencies,
+        currency: currencies[0],
         updating: false
     }
   },
@@ -22,7 +22,7 @@ module.exports = {
       this.cryptoAssets = response.body.data;
       if(localStorage.getItem('dashboardList')){
         this.dashboardList = JSON.parse(localStorage.getItem('dashboardList'));
-        if(localStorage.getItem('currency') != 'undefined'){
+        if(localStorage.getItem('currency') != null){
           console.log('search currency', localStorage.getItem('currency'))
           this.currency = this.currencies.find(c => c.name == localStorage.getItem('currency'));
         }
