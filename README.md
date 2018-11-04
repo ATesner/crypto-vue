@@ -6,6 +6,8 @@ You can follow crypto currencies : rate, market cap... You have to research a cr
 
 See the project at https://atesner.github.io/crypto-vue/
 
+![crypto-vue-gif](https://antoinetesner.fr/wp-content/uploads/2018/11/vignette.gif)
+
 ## Build Setup
 
 ``` bash
