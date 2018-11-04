@@ -41,6 +41,7 @@ html {
 .dashboard-header {
   display: flex;
   flex-wrap: wrap;
+  justify-content: space-evenly;
   width: 100%;
 }
 .config-panel, .asset-overview {

@@ -121,12 +121,17 @@ module.exports = {
             // console.log('Asset UPDATE',response);
             let data = response.body.data;
             this.dashboardList[i].price = data.quotes[this.currency.name].price;
-            this.saveDashboardList();
+            this.dashboardList[i].market_cap = data.quotes[this.currency.name].market_cap;
           });
         }
+        this.saveDashboardList();
         if(this.cryptoSelected != null){
           this.$http.get('ticker/'+ this.cryptoSelected.id +'/?convert='+this.currency.name).then((response) => {
-            this.cryptoSelected.price = response.body.data.quotes[this.currency.name].price;
+            let tmp = this.cryptoSelected;
+            tmp.price =  response.body.data.quotes[this.currency.name].price;
+            tmp.market_cap = response.body.data.quotes[this.currency.name].market_cap;
+            this.cryptoSelected = null;
+            this.cryptoSelected = tmp;
             console.log('UPDATE cryptoSelected', this.cryptoSelected);
             this.updating = false;
           });

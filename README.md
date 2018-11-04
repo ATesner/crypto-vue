@@ -2,6 +2,8 @@
 
 > A dashboard to follow crypto currencies price
 
+You can follow crypto currencies : rate, market cap... You have to research a crypto currency to add it to the dashboard. Informations are taken from [coinmarketcap.com](https://coinmarketcap.com), and are saved in the local storage of the browser. So, the dashboard state is automaticaly saved.
+
 See the project at https://atesner.github.io/crypto-vue/
 
 ## Build Setup
